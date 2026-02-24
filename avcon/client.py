@@ -553,3 +553,65 @@ class DenonAVR:
         root = self._post_param("GetUpdateInfo", ["status"])
         params = parse_params(root)
         return {k: v[0] for k, v in params.items()}
+
+    # --- 制御コマンド (formiPhoneAppDirect.xml) ---
+
+    def _command(self, cmd: str) -> None:
+        """Send control command via formiPhoneAppDirect.xml."""
+        resp = requests.get(
+            f"{self._base}/goform/formiPhoneAppDirect.xml?{cmd}",
+            timeout=self._timeout,
+        )
+        resp.raise_for_status()
+
+    def power_on(self, zone: int = 1) -> None:
+        """Power on the specified zone."""
+        cmd = {1: "PWON", 2: "Z2ON", 3: "Z3ON"}[zone]
+        self._command(cmd)
+
+    def power_standby(self, zone: int = 1) -> None:
+        """Set the specified zone to standby."""
+        cmd = {1: "PWSTANDBY", 2: "Z2OFF", 3: "Z3OFF"}[zone]
+        self._command(cmd)
+
+    def volume_up(self, zone: int = 1) -> None:
+        """Increase volume by one step."""
+        cmd = {1: "MVUP", 2: "Z2UP", 3: "Z3UP"}[zone]
+        self._command(cmd)
+
+    def volume_down(self, zone: int = 1) -> None:
+        """Decrease volume by one step."""
+        cmd = {1: "MVDOWN", 2: "Z2DOWN", 3: "Z3DOWN"}[zone]
+        self._command(cmd)
+
+    def volume_set(self, level: int, zone: int = 1) -> None:
+        """Set absolute volume level (0-98, half-step with 5 suffix e.g. 335=-46.5dB)."""
+        if zone == 1:
+            self._command(f"MV{level:02d}")
+        elif zone == 2:
+            self._command(f"Z2{level:02d}")
+        else:
+            self._command(f"Z3{level:02d}")
+
+    def mute_on(self, zone: int = 1) -> None:
+        """Enable mute."""
+        cmd = {1: "MUON", 2: "Z2MUON", 3: "Z3MUON"}[zone]
+        self._command(cmd)
+
+    def mute_off(self, zone: int = 1) -> None:
+        """Disable mute."""
+        cmd = {1: "MUOFF", 2: "Z2MUOFF", 3: "Z3MUOFF"}[zone]
+        self._command(cmd)
+
+    def select_source(self, source: str, zone: int = 1) -> None:
+        """Select input source (e.g. 'BD', 'SAT/CBL', 'MPLAY')."""
+        if zone == 1:
+            self._command(f"SI{source}")
+        elif zone == 2:
+            self._command(f"Z2{source}")
+        else:
+            self._command(f"Z3{source}")
+
+    def select_surround_mode(self, mode: str) -> None:
+        """Select surround mode (e.g. 'DOLBY ATMOS', 'STEREO', 'AUTO')."""
+        self._command(f"MS{mode}")

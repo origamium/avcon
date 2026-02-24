@@ -1,7 +1,12 @@
 [project]
 name = "avcon"
 version = "0.1.0"
-description = "Add your description here"
+description = "DENON AVC-A110 network control"
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = ["requests", "python-dotenv"]
+dependencies = [
+    "requests",
+    "python-dotenv",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+]
